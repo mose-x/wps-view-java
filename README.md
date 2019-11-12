@@ -1,0 +1,20 @@
+# wps-view-java
+## 环境准备
+1. 前提
+    - 申请[wps在线编辑服务](https://open.wps.cn/weboffice/)，获取到appid和appsecret
+    - 设置wps回调url，如http://123.34.56.78:8080（此端口号必须与java项目中端口号一致）
+    - 申请阿里oss，获取到access_key和access_secret等相关参数（其它云存储请自行集成）
+    - java编译器安装lombok插件，详见[lombok安装说明](https://blog.csdn.net/qq_23501739/article/details/91559450)
+2. 服务
+    - 初始化mysql，执行resources下的wpsinit.sql文件（数据库可自己改，以及其中文件url，头像url，请自行填写）
+    - 配置resources下application.properties中的mysql、wps以及oss相关参数
+    - 打包后部署到回调服务器（注意端口号）
+    - 其它相关接口请查阅[wps开放平台文档](http://open-doc.wps.cn/)
+3. 设计
+    - 详见resources下的 导图.png 和 表结构.png
+
+## 配置文件中的参数部分可做参考
+## 代码结构可自行调整
+
+## 彩蛋
+ApplicationTests类文件中，有个OSS地址转在线预览地址方法，但是是收费的，相关费用自行了解
