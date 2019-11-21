@@ -4,6 +4,7 @@
     - 申请[wps在线编辑服务](https://open.wps.cn/weboffice/)，获取到appid和appsecret
     - 设置wps回调url，如http://123.34.56.78:8080（此端口号必须与java项目中端口号一致）
     - 申请阿里oss，获取到access_key和access_secret等相关参数（其它云存储请自行集成）
+        - 不想使用oss的，或者是想使用其它云，以及服务文件的，可屏蔽版本更新接口中的代码，或者重构，或者不管（只是保存版本的时候有异常），先整体拉通工程
     - java编译器安装lombok插件，详见[lombok安装说明](https://blog.csdn.net/qq_23501739/article/details/91559450)
 2. 服务
     - 初始化mysql，执行resources下的wpsinit.sql文件（数据库可自己改，以及其中文件url，头像url，请自行填写）
