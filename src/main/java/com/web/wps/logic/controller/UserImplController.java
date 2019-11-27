@@ -38,7 +38,7 @@ public class UserImplController extends BaseController {
     @GetMapping("getViewUrlWebPath")
     public ResponseEntity<Object> getViewUrlWebPath(String fileUrl){
         logger.info("getViewUrlWebPath：fileUrl={}",fileUrl);
-        Token t = fileService.getViewUrl(fileUrl,false);
+        Token t = fileService.getViewUrl(fileUrl,true);
         return Response.success(t);
     }
 
@@ -61,7 +61,7 @@ public class UserImplController extends BaseController {
     @GetMapping("getViewUrlDbPath")
     public ResponseEntity<Object> getViewUrlDbPath(String fileId,String userId){
         logger.info("getViewUrlDbPath：fileId={},userId={}",fileId,userId);
-        Token t = fileService.getViewUrl(fileId,userId,false);
+        Token t = fileService.getViewUrl(fileId,userId,true);
         if (t != null){
             return Response.success(t);
         }else {
