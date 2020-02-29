@@ -72,7 +72,7 @@ CREATE TABLE `w_user_acl_t`  (
                                `user_id` int(40) NULL DEFAULT NULL,
                                `file_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
                                `permission` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
-                               `rename` int(11) NULL DEFAULT NULL,
+                               `re_name` int(11) NULL DEFAULT NULL,
                                `history` int(11) NULL DEFAULT NULL,
                                PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
