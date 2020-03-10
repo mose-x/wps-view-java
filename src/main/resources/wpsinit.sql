@@ -15,6 +15,8 @@ CREATE TABLE `w_file_t`  (
                            `modifier` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
                            `modify_time` bigint(20) NULL DEFAULT NULL,
                            `download_url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,
+                           `deleted` char(2) DEFAULT 'N',
+                           `can_delete` char(2) DEFAULT 'Y',
                            PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Compact;
 

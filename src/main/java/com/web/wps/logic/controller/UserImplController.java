@@ -1,17 +1,16 @@
 package com.web.wps.logic.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.web.wps.base.BaseController;
 import com.web.wps.base.Response;
 import com.web.wps.logic.dto.FileListDTO;
-import com.web.wps.logic.entity.FileEntity;
 import com.web.wps.logic.service.FileService;
 import com.web.wps.util.Token;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -54,6 +53,52 @@ public class UserImplController extends BaseController {
     }
 
     /**
+     * 获取所有文件
+     * @return db下的所有文件
+     */
+    @PostMapping("getFileListByPage")
+    public ResponseEntity<Object> getFileListByPage(
+            @RequestBody com.web.wps.base.Page page
+    ){
+        logger.info("获取所有文件-分页:{}", JSON.toJSON(page));
+        Page<FileListDTO> result = fileService.getFileListByPage(page);
+        return Response.success(result);
+    }
+
+    /**
+     * 删除用户文件
+     * @return true Or false
+     */
+    @GetMapping("delFile")
+    public ResponseEntity<Object> delFile(String id){
+        logger.info("删除文件：{}",id);
+        int res = fileService.delFile(id);
+        if (res == 1){
+            return Response.success(true,"删除成功");
+        }else if (res == 0){
+            return Response.success(false,"删除失败，该文件不允许被删除");
+        }else {
+            return Response.success(false,"数据异常");
+        }
+    }
+
+    /**
+     * 上传文件
+     */
+    @PostMapping("uploadFile")
+    public ResponseEntity<Object> uploadFile(
+            @RequestParam("file") MultipartFile file
+    ){
+        try {
+            fileService.uploadFile(file);
+            return Response.success(true,"上传成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return Response.success(false,"上传失败");
+        }
+    }
+
+    /**
      * 通过fileId获取wpsUrl以及token
      * @param fileId 文件id
      * @return token（包含url）
@@ -67,6 +112,18 @@ public class UserImplController extends BaseController {
         }else {
             return Response.bad("文件不存在或其它异常！");
         }
+    }
+
+    /**
+     * 通过wps官方模版新建文件
+     * template值 {"word", "excel", "ppt"}
+     */
+    @GetMapping("createTemplateFile")
+    public ResponseEntity<Object> createTemplateFile(
+            String template
+    ){
+        Object newUrl = fileService.createTemplateFile(template);
+        return Response.success(newUrl);
     }
 
 }

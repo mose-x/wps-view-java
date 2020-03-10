@@ -1,6 +1,9 @@
-package com.web.wps.util;
+package com.web.wps.util.file;
 
 public class FileUtil {
+
+    // office
+    private static String[] office = {"word", "excel", "ppt"};
 
     // excel
     private static String[] etExts = {"et", "xls", "xlt", "xlsx", "xlsm", "xltx", "xltm", "csv"};
@@ -34,6 +37,26 @@ public class FileUtil {
             if (et.equalsIgnoreCase(fileType)){
                 return "f";
             }
+        }
+        return null;
+    }
+
+    public static boolean checkCode(String fileType){
+        for (String et : office){
+            if (et.equalsIgnoreCase(fileType)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String getTypeCode(String fileType){
+        if ("word".equalsIgnoreCase(fileType)){
+            return "w";
+        }if ("excel".equalsIgnoreCase(fileType)){
+            return "s";
+        }if ("ppt".equalsIgnoreCase(fileType)){
+            return "p";
         }
         return null;
     }

@@ -49,19 +49,14 @@ public class SignatureUtil {
                 continue;
             }
             contents.append(key).append("=").append(params.get(key));
-            System.out.println("key:" + key + ",value:" + params.get(key));
         }
         contents.append("_w_secretkey=").append(appSecret);
-
-        System.out.println(appSecret);
-        System.out.println(contents.toString());
 
         // 进行hmac sha1 签名
         byte[] bytes = HmacUtils.hmacSha1(appSecret.getBytes(), contents.toString().getBytes());
 
         //字符串经过Base64编码
         String sign = encodeBase64String(bytes);
-        System.out.println(sign);
         try {
             return URLEncoder.encode(sign, "UTF-8");
         } catch (UnsupportedEncodingException e) {

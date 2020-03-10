@@ -1,4 +1,13 @@
 # wps-view-java
+## 本次更新
+1. 增加前端调用的新建模版接口，快速新建文件
+2. w_user_acl_t权限表中rename字段更改为re_name，避免和mysql关键字冲突报错
+3. 满足你的OSS所有需求，util中OSSUtil包含了所有常用的oss方法，全部测试可用
+4. 增加上传、删除等文件管理接口
+
+### 演示地址
+[http://www.ljserver.cn:5000](http://www.ljserver.cn:5000)
+
 ## 环境准备
 1. 前提
     - 申请[wps在线编辑服务](https://open.wps.cn/weboffice/)，获取到appid和appsecret
@@ -13,6 +22,8 @@
     - 其它相关接口请查阅[wps开放平台文档](http://open-doc.wps.cn/)
 3. 设计
     - 详见resources下的 导图.png 和 表结构.png
+4. 前端代码地址
+[https://github.com/mose-x/wps-view-vue.git](https://github.com/mose-x/wps-view-vue.git)
 
 ## 配置文件中的参数部分可做参考
 ## 代码结构可自行调整

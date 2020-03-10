@@ -3,7 +3,6 @@ package com.web.wps;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.GeneratePresignedUrlRequest;
 import com.aliyun.oss.model.GetObjectRequest;
-import com.web.wps.util.FileUtil;
 import org.junit.Test;
 
 import java.net.URL;

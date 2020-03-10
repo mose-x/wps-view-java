@@ -8,8 +8,13 @@ import com.web.wps.logic.entity.*;
 import com.web.wps.logic.repository.FileRepository;
 import com.web.wps.propertie.WpsProperties;
 import com.web.wps.util.*;
+import com.web.wps.util.file.FileUtil;
+import com.web.wps.util.oss.OSSDTO;
+import com.web.wps.util.oss.OSSUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,7 +60,6 @@ public class FileService extends BaseService<FileEntity,String> {
         Token t = new Token();
 
         String fileType = FileUtil.getFileTypeByPath(fileUrl);
-
         // fileId使用uuid保证出现同样的文件而是最新文件
         UUID randomUUID = UUID.randomUUID();
         String uuid = randomUUID.toString().replace("-","");
@@ -206,8 +210,9 @@ public class FileService extends BaseService<FileEntity,String> {
     }
 
     public Map<String,Object> fileNew(MultipartFile file, String userId){
-        String fileUrl = ossUtil.uploadStream2OSS(file);
-        String fileName = FileUtil.getFileName(fileUrl);
+        OSSDTO ossdto = ossUtil.uploadMultipartFile2OSS(file);
+        String fileName = ossdto.getFileName();
+        String fileUrl = ossdto.getFileUrl();
         int fileSize = (int) file.getSize();
         Date date = new Date();
         long dataTime = date.getTime();
@@ -275,7 +280,8 @@ public class FileService extends BaseService<FileEntity,String> {
     public Map<String,Object> fileSave(MultipartFile mFile,String userId){
         Date date = new Date();
         // 上传oss
-        String newFileUrl = ossUtil.uploadStream2OSS(mFile);
+        OSSDTO ossdto = ossUtil.uploadMultipartFile2OSS(mFile);
+        int size = (int) ossdto.getFileSize();
 
         String fileId = Context.getFileId();
         FileEntity file = this.findOne(fileId);
@@ -285,9 +291,10 @@ public class FileService extends BaseService<FileEntity,String> {
 
         // 更新当前版本
         file.setVersion(file.getVersion() + 1);
-        file.setDownload_url(newFileUrl);
+        file.setDownload_url(ossdto.getFileUrl());
         file.setModifier(userId);
         file.setModify_time(date.getTime());
+        file.setSize(size);
         this.update(file);
 
         // 保存历史版本
@@ -296,6 +303,7 @@ public class FileService extends BaseService<FileEntity,String> {
         fileVersion.setFileId(fileId);
         fileVersion.setVersion(file.getVersion() - 1);
         fileVersion.setDownload_url(oldFileUrl);
+        fileVersion.setSize(size);
         fileVersionService.save(fileVersion);
 
         // 返回当前版本信息
@@ -322,6 +330,52 @@ public class FileService extends BaseService<FileEntity,String> {
 
     public List<FileListDTO> getFileList(){
         return this.getRepository().findAllFile();
+    }
+
+    public Page<FileListDTO> getFileListByPage(com.web.wps.base.Page page){
+        PageRequest pages = new PageRequest(page.getPage()-1,page.getSize());
+        return this.getRepository().getAllFileByPage(pages);
+    }
+
+    public int delFile(String id){
+        FileEntity file = this.findOne(id);
+        if (file != null){
+            if ("Y".equalsIgnoreCase(file.getCanDelete())){
+                // del
+                this.getRepository().delFile(id);
+                return 1;
+            }else {
+                return 0;
+            }
+        }else {
+            return -1;
+        }
+    }
+
+    public void uploadFile(MultipartFile file){
+        String uploadUserId = "3";
+        OSSDTO ossdto = ossUtil.uploadMultipartFile2OSS(file);
+        // 上传成功后，处理数据库记录值
+        Date date = new Date();
+        long dataTime = date.getTime();
+        // 保存文件
+        FileEntity f = new FileEntity(ossdto.getFileName(),1,((int) ossdto.getFileSize()),
+                uploadUserId,uploadUserId,dataTime,dataTime,ossdto.getFileUrl());
+        this.save(f);
+
+        // 处理权限
+        userAclService.saveUserFileAcl(uploadUserId,f.getId());
+
+        // 处理水印
+        watermarkService.saveWatermark(f.getId());
+    }
+
+    public String createTemplateFile(String template){
+        boolean typeTrue = FileUtil.checkCode(template);
+        if (typeTrue){
+            return wpsUtil.getTemplateWpsUrl(template,"3");
+        }
+        return "";
     }
 
 }

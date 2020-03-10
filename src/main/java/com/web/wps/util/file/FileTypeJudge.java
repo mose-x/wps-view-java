@@ -1,4 +1,4 @@
-package com.web.wps.util;
+package com.web.wps.util.file;
 
 import org.springframework.stereotype.Component;
 

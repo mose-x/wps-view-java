@@ -1,4 +1,4 @@
-package com.web.wps.util;
+package com.web.wps.util.file;
 
 /**
  * 文件类型枚取

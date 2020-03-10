@@ -85,6 +85,18 @@ public class Response {
 		return getEntity(result);
 	}
 
+	public static ResponseEntity<Object> success(boolean data,String msg) {
+		Map<String, Object> result = new HashMap<String, Object>(){
+			{
+				put(STATUS_KEY, SUCCESS_VALUE);
+				put(MSG_KEY, msg);
+				put(CODE_KEY, HttpStatus.OK.value());
+				put(DATA_KEY,data);
+			}
+		};
+		return getEntity(result);
+	}
+
 	public static ResponseEntity<Object> bad(String msg) {
 		Map<String, Object> result = new HashMap<String, Object>(){
 			{

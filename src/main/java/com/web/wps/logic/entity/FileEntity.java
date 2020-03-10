@@ -27,9 +27,9 @@ public class FileEntity extends BaseEntity {
 
 	@Id
 	@GenericGenerator(name="idGenerator", strategy="uuid")
-    @GeneratedValue(generator="idGenerator")
+	@GeneratedValue(generator="idGenerator")
 	@Column(length = 50)
-    private String id;
+	private String id;
 	private String name;
 	private int version;
 	private int size;
@@ -43,6 +43,9 @@ public class FileEntity extends BaseEntity {
 	@Column(name = "download_url")
 	private String download_url;
 
+	private String deleted;
+	private String canDelete;
+
 	public FileEntity(){super();}
 
 	public FileEntity(String name, int version, int size, String creator,
@@ -55,5 +58,7 @@ public class FileEntity extends BaseEntity {
 		this.create_time = create_time;
 		this.modify_time = modify_time;
 		this.download_url = download_url;
+		this.deleted = "N";
+		this.canDelete = "Y";
 	}
 }
