@@ -6,7 +6,7 @@
 4. 增加上传、删除等文件管理接口
 
 ### 演示地址
-[http://www.ljserver.cn:5000](http://www.ljserver.cn:5000)
+[https://ljserver.cn/wpsonline](https://ljserver.cn/wpsonline)
 
 ## 环境准备
 1. 前提
