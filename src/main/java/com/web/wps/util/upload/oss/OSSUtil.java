@@ -1,4 +1,4 @@
-package com.web.wps.util.oss;
+package com.web.wps.util.upload.oss;
 
 import com.aliyun.oss.HttpMethod;
 import com.aliyun.oss.OSS;
@@ -8,6 +8,7 @@ import com.web.wps.propertie.OSSProperties;
 import com.web.wps.util.file.FileType;
 import com.web.wps.util.file.FileTypeJudge;
 import com.web.wps.util.file.FileUtil;
+import com.web.wps.util.upload.ResFileDTO;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,21 +39,21 @@ public class OSSUtil {
         return new OSSClient(oss.getEndpoint(),oss.getAccessKey(), oss.getAccessSecret());
     }
 
-    public String simpleUploadFilePath2OSS(String filePath){
+    public String simpleUploadFilePath(String filePath){
         File file = new File(filePath);
-        return (this.simpleUploadFile2OSS(file));
+        return (this.simpleUploadFile(file));
     }
 
-    public String simpleUploadFile2OSS(File file){
+    public String simpleUploadFile(File file){
         String fileName = file.getName();
-        String newFileName = this.makeNewFileName(fileName);
+        String newFileName = FileUtil.makeNewFileName(fileName);
         this.getOSSClient().putObject(oss.getBucketName(), oss.getDiskName() + newFileName, file);
         return (oss.getFileUrlPrefix() + oss.getDiskName() + newFileName);
     }
 
-    public String simpleUploadMultipartFile2OSS(MultipartFile file){
+    public String simpleUploadMultipartFile(MultipartFile file){
         String fileName = file.getOriginalFilename();
-        String newFileName = this.makeNewFileName(fileName);
+        String newFileName = FileUtil.makeNewFileName(fileName);
         try {
             this.getOSSClient().putObject(oss.getBucketName(), oss.getDiskName() + newFileName, file.getInputStream());
         } catch (IOException e) {
@@ -61,10 +62,10 @@ public class OSSUtil {
         return (oss.getFileUrlPrefix() + oss.getDiskName() + newFileName);
     }
 
-    public OSSDTO uploadMultipartFile2OSS(MultipartFile file){
+    public ResFileDTO uploadMultipartFile(MultipartFile file){
         String fileName = file.getOriginalFilename();
         InputStream inputStream;
-        OSSDTO o = new OSSDTO();
+        ResFileDTO o = new ResFileDTO();
         String fileType ;
         long fileSize = file.getSize();
         try {
@@ -93,23 +94,20 @@ public class OSSUtil {
         return o;
     }
 
-    public OSSDTO uploadDetailInputStream (InputStream in,String fileName ,String fileType, long fileSize) {
+    public ResFileDTO uploadDetailInputStream (InputStream in, String fileName , String fileType, long fileSize) {
 
-        String uuid = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
-        String uuidFileName = fileName.replace(".","").replace(fileType,"") + uuid + "." + fileType ;
-
-        uuidFileName = new String(uuidFileName.getBytes(), StandardCharsets.UTF_8);
+        String uuidFileName = FileUtil.getFileUUIDName(fileName,fileType);
 
         String fileUrl = oss.getFileUrlPrefix() + oss.getDiskName() + uuidFileName;
 
-        String md5key = this.uploadFile2OSS(in, uuidFileName, fileSize, oss.getBucketName(),
+        String md5key = this.uploadFile(in, uuidFileName, fileSize, oss.getBucketName(),
                 oss.getDiskName(),fileName);
-        OSSDTO o = new OSSDTO();
+        ResFileDTO o = new ResFileDTO();
 
         if(md5key != null){
             o.setFileType(fileType);
             o.setFileName(fileName);
-            o.setOssFileName(uuidFileName);
+            o.setCFileName(uuidFileName);
             o.setFileUrl(fileUrl);
             o.setFileSize(fileSize);
             o.setMd5key(md5key);
@@ -123,7 +121,7 @@ public class OSSUtil {
      * @param diskName 上传文件的目录  --bucket下文件的路径
      * @return String 唯一MD5数字签名
      * */
-    public String uploadFile2OSS(InputStream inputStream, String fileName,long fileSize,String bucketName, String diskName,String localFileName) {
+    public String uploadFile(InputStream inputStream, String fileName,long fileSize,String bucketName, String diskName,String localFileName) {
         String resultStr = null;
         try {
             OSSClient client =  this.getOSSClient();
@@ -241,7 +239,7 @@ public class OSSUtil {
      * @param diskName 上传文件的目录  --bucket下文件的路径
      * @return String 唯一MD5数字签名
      * */
-    public String uploadObject2OSS(File file, String bucketName, String diskName) {
+    public String uploadObject(File file, String bucketName, String diskName) {
         String resultStr = null;
         try {
             OSSClient client =  this.getOSSClient();
@@ -355,7 +353,7 @@ public class OSSUtil {
      * @param diskName 上传文件的目录  --bucket下文件的路径
      * @return String 唯一MD5数字签名
      * */
-    public String downloadFileFromOSS(String bucketName, String diskName,String filePath) {
+    public String downloadFile(String bucketName, String diskName,String filePath) {
         String resultStr = null;
         try {
             OSSClient client =  this.getOSSClient();
@@ -374,7 +372,7 @@ public class OSSUtil {
      * @param diskName 文件路径
      * @param key Bucket下的文件的路径名+文件名
      */
-    public static InputStream getOSS2InputStream(OSSClient client, String bucketName, String diskName, String key){
+    public static InputStream getInputStream(OSSClient client, String bucketName, String diskName, String key){
         OSSObject ossObj = client.getObject(bucketName, diskName + key);
         return ossObj.getObjectContent();
     }
@@ -390,14 +388,6 @@ public class OSSUtil {
         client.deleteObject(bucketName, diskName + key);
         client.shutdown();
         System.out.println("删除" + bucketName + "下的文件" + diskName + key + "成功");
-    }
-
-    private String makeNewFileName(String oldFileName){
-        String fileType = FileUtil.getFileTypeByName(oldFileName);
-        String tempFileName = oldFileName.replace("."+fileType,"");
-        Random ne = new Random();//实例化一个random的对象ne
-        int uuid = ne.nextInt(90000)+10000;//为变量赋随机值10000-99999
-        return  tempFileName + uuid + "." + fileType;
     }
 
     /**

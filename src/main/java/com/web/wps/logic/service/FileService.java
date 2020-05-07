@@ -6,11 +6,14 @@ import com.web.wps.config.Context;
 import com.web.wps.logic.dto.*;
 import com.web.wps.logic.entity.*;
 import com.web.wps.logic.repository.FileRepository;
+import com.web.wps.propertie.UploadProperties;
 import com.web.wps.propertie.WpsProperties;
 import com.web.wps.util.*;
 import com.web.wps.util.file.FileUtil;
-import com.web.wps.util.oss.OSSDTO;
-import com.web.wps.util.oss.OSSUtil;
+import com.web.wps.util.upload.ResFileDTO;
+import com.web.wps.util.upload.UploadFileLocation;
+import com.web.wps.util.upload.oss.OSSUtil;
+import com.web.wps.util.upload.qn.QNUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,11 +34,14 @@ public class FileService extends BaseService<FileEntity,String> {
     private final WatermarkService watermarkService;
     private final UserService userService;
     private final FileVersionService fileVersionService;
+    private final QNUtil qnUtil;
+    private final UploadProperties uploadProperties;
 
     @Autowired
     public FileService(WpsUtil wpsUtil, WpsProperties wpsProperties, OSSUtil ossUtil,
                        UserAclService userAclService, WatermarkService watermarkService,
-                       UserService userService, FileVersionService fileVersionService) {
+                       UserService userService, FileVersionService fileVersionService,
+                       QNUtil qnUtil, UploadProperties uploadProperties) {
         this.wpsUtil = wpsUtil;
         this.wpsProperties = wpsProperties;
         this.ossUtil = ossUtil;
@@ -43,6 +49,8 @@ public class FileService extends BaseService<FileEntity,String> {
         this.watermarkService = watermarkService;
         this.userService = userService;
         this.fileVersionService = fileVersionService;
+        this.qnUtil = qnUtil;
+        this.uploadProperties = uploadProperties;
     }
 
     @Override
@@ -210,9 +218,14 @@ public class FileService extends BaseService<FileEntity,String> {
     }
 
     public Map<String,Object> fileNew(MultipartFile file, String userId){
-        OSSDTO ossdto = ossUtil.uploadMultipartFile2OSS(file);
-        String fileName = ossdto.getFileName();
-        String fileUrl = ossdto.getFileUrl();
+        ResFileDTO resFileDTO;
+        if (uploadProperties.getFileLocation().equalsIgnoreCase(UploadFileLocation.QN)){
+            resFileDTO = qnUtil.uploadMultipartFile(file);
+        }else {
+            resFileDTO = ossUtil.uploadMultipartFile(file);
+        }
+        String fileName = resFileDTO.getFileName();
+        String fileUrl = resFileDTO.getFileUrl();
         int fileSize = (int) file.getSize();
         Date date = new Date();
         long dataTime = date.getTime();
@@ -279,9 +292,14 @@ public class FileService extends BaseService<FileEntity,String> {
 
     public Map<String,Object> fileSave(MultipartFile mFile,String userId){
         Date date = new Date();
-        // 上传oss
-        OSSDTO ossdto = ossUtil.uploadMultipartFile2OSS(mFile);
-        int size = (int) ossdto.getFileSize();
+        // 上传
+        ResFileDTO resFileDTO;
+        if (uploadProperties.getFileLocation().equalsIgnoreCase(UploadFileLocation.QN)){
+            resFileDTO = qnUtil.uploadMultipartFile(mFile);
+        }else {
+            resFileDTO = ossUtil.uploadMultipartFile(mFile);
+        }
+        int size = (int) resFileDTO.getFileSize();
 
         String fileId = Context.getFileId();
         FileEntity file = this.findOne(fileId);
@@ -291,7 +309,7 @@ public class FileService extends BaseService<FileEntity,String> {
 
         // 更新当前版本
         file.setVersion(file.getVersion() + 1);
-        file.setDownload_url(ossdto.getFileUrl());
+        file.setDownload_url(resFileDTO.getFileUrl());
         file.setModifier(userId);
         file.setModify_time(date.getTime());
         file.setSize(size);
@@ -354,13 +372,18 @@ public class FileService extends BaseService<FileEntity,String> {
 
     public void uploadFile(MultipartFile file){
         String uploadUserId = "3";
-        OSSDTO ossdto = ossUtil.uploadMultipartFile2OSS(file);
+        ResFileDTO resFileDTO;
+        if (uploadProperties.getFileLocation().equalsIgnoreCase(UploadFileLocation.QN)){
+            resFileDTO = qnUtil.uploadMultipartFile(file);
+        }else {
+            resFileDTO = ossUtil.uploadMultipartFile(file);
+        }
         // 上传成功后，处理数据库记录值
         Date date = new Date();
         long dataTime = date.getTime();
         // 保存文件
-        FileEntity f = new FileEntity(ossdto.getFileName(),1,((int) ossdto.getFileSize()),
-                uploadUserId,uploadUserId,dataTime,dataTime,ossdto.getFileUrl());
+        FileEntity f = new FileEntity(resFileDTO.getFileName(),1,((int) resFileDTO.getFileSize()),
+                uploadUserId,uploadUserId,dataTime,dataTime, resFileDTO.getFileUrl());
         this.save(f);
 
         // 处理权限

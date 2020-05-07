@@ -1,5 +1,10 @@
 package com.web.wps.util.file;
 
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Random;
+
 public class FileUtil {
 
     // office
@@ -82,5 +87,27 @@ public class FileUtil {
         String[] arr = fileName.split("\\.");
         return arr[arr.length-1];
     }
+
+    public static String getFileUUIDName(String fileName,String fileType){
+        String uuid = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date());
+        String uuidFileName = fileName.replace(".","").replace(fileType,"") + uuid + "." + fileType ;
+        return new String(uuidFileName.getBytes(), StandardCharsets.UTF_8);
+    }
+
+    public static String makeNewFileName(String oldFileName){
+        String fileType = FileUtil.getFileTypeByName(oldFileName);
+        String tempFileName = oldFileName.replace("."+fileType,"");
+        Random ne = new Random();//实例化一个random的对象ne
+        int uuid = ne.nextInt(90000)+10000;//为变量赋随机值10000-99999
+        return  tempFileName + uuid + "." + fileType;
+    }
+
+    public static String makeNewFileName(String oldFileName,String fileType){
+        String tempFileName = oldFileName.replace("."+fileType,"");
+        Random ne = new Random();//实例化一个random的对象ne
+        int uuid = ne.nextInt(90000)+10000;//为变量赋随机值10000-99999
+        return  tempFileName + uuid + "." + fileType;
+    }
+
 
 }
