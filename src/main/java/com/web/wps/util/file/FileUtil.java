@@ -1,5 +1,7 @@
 package com.web.wps.util.file;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -109,5 +111,22 @@ public class FileUtil {
         return  tempFileName + uuid + "." + fileType;
     }
 
+    public static int getFileSize(String fileUrl){
+        if (fileUrl == null || "".equals(fileUrl)) {
+            return 0;
+        }
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(fileUrl);
+            conn = (HttpURLConnection) url.openConnection();
+            return conn.getContentLength();
+        } catch (Exception e) {
+            return 0;
+        } finally {
+            if (conn != null){
+                conn.disconnect();
+            }
+        }
+    }
 
 }

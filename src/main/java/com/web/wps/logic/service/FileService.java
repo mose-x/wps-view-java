@@ -143,10 +143,12 @@ public class FileService extends BaseService<FileEntity,String> {
                 "-1","我","read","https://zmfiletest.oss-cn-hangzhou.aliyuncs.com/user0.png"
         );
 
+        int fileSize = FileUtil.getFileSize(filePath);
+
         // 构建文件
         FileDTO file = new FileDTO(
                 Context.getFileId(), FileUtil.getFileName(filePath),
-                1,2835,"-1",new Date().getTime(), filePath,
+                1,fileSize,"-1",new Date().getTime(), filePath,
                 // 默认设置为无水印，只读权限
                 new UserAclBO(),new WatermarkBO()
         );
