@@ -1,5 +1,9 @@
 # wps-view-java
 
+## 后续更新
+1. 后续更新全部转移到国内gitee，请知晓
+2. [传送门](https://gitee.com/mose-x/wps-view-java)
+
 ## 本次更新06-28
 1. 升级oss-sdk（强，不升级可能导致上传oss报错）
 2. 修改在线文档预览获取文件大小
